@@ -52,12 +52,15 @@ struct ReminderView: View {
                                     .wiggle.wholeSymbol, options: .nonRepeating)
                         }
                     }
+                    
                     Text("No reminders yet! \n Set one now to stay hydrated!")
                         .multilineTextAlignment(.center)
+                    
                 } else {
                     addReminderView()
                 }
             }
+            
             .pickerStyle(.navigationLink)
             .navigationTitle("Reminder")
             
@@ -81,7 +84,7 @@ struct ReminderView: View {
             
         }
         
-        //request izin notif //tes
+        //request izin notif
         .onAppear() {
             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {granted, error in
                 if granted {
@@ -90,7 +93,6 @@ struct ReminderView: View {
                     print ("Error requesting permission: \(error.localizedDescription)")
                 }
             }
-            
             loadAlarms()
         }
         
@@ -153,7 +155,6 @@ struct ReminderView: View {
 }
 
 private func scheduleNotification(for reminder: Reminder) {
-    // jika reminder ke disable, jangan di remind
     guard reminder.isEnabled else { return }
     
     let content = UNMutableNotificationContent()
@@ -171,17 +172,18 @@ private func scheduleNotification(for reminder: Reminder) {
     
     let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
 
-    //unique id notifikasi pakai id reminder
-//    let _ = UNNotificationRequest(identifier: reminder.id.uuidString, content: content, trigger: trigger)
+    let request = UNNotificationRequest(identifier: reminder.id.uuidString, content: content, trigger: trigger)
     
+    UNUserNotificationCenter.current().add(request) { error in
+        if let error = error {
+            print("❌ Error scheduling notification: \(error.localizedDescription)")
+        }
+    }
 }
 
-// Cancel a notification for a specific reminder
 private func cancelNotification(for reminder: Reminder) {
     UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [reminder.id.uuidString])
 }
-
-
 
 
 #Preview {

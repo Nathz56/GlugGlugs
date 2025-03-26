@@ -7,12 +7,19 @@
 
 import SwiftUI
 
-@main
-struct GlugGlugApp: App {
 
+class ColorScheme {
+    
+}
+
+@main
+
+struct GlugGlugApp: App {
+    @Environment(\.colorScheme) var colorScheme
     var body: some Scene {
         WindowGroup {
             ContentView()
+//                .environment()
         }
     }
 }
