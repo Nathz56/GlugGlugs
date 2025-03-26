@@ -33,7 +33,7 @@ struct AddAlarmView: View {
                 
             }
             .padding()
-            .buttonStyle(.borderless)
+            .buttonStyle(.borderedProminent)
         }
         .padding()
     }

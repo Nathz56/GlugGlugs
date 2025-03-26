@@ -5,6 +5,7 @@
 //  Created by Frengky Gunawan on 19/03/25.
 //
 
+
 import UserNotifications
 import SwiftUI
 
@@ -15,94 +16,94 @@ struct Reminder: Identifiable, Codable {
     var isEnabled: Bool
 }
 
-
-
 struct ReminderView: View {
-    
     @Environment(\.colorScheme) var colorScheme
     @State private var menuAddAlarm = false
-    @State private var listAlarms: [Reminder] = []  {
+    @State private var listAlarms: [Reminder] = [] {
         didSet {
             saveAlarms()
         }
-    }//nyimpen saved alarm
+    }
+    @State private var selectedReminder: Reminder?
     
     let userDefaultKey = "savedAlarms"
     
     var body: some View {
-        NavigationStack{
+        NavigationStack {
             VStack {
                 if listAlarms.isEmpty {
-                    VStack{
-                        ZStack (alignment: .bottomTrailing){
+                    VStack {
+                        ZStack(alignment: .bottomTrailing) {
                             Image(systemName: "alarm")
                                 .resizable()
                                 .frame(width: 70, height: 70, alignment: .leading)
                                 .foregroundColor(.blue)
-                                .symbolEffect(
-                                    .wiggle.wholeSymbol, options: .nonRepeating
-                                ) .padding(19)
+                                .symbolEffect(.wiggle.wholeSymbol, options: .nonRepeating)
+                                .padding(19)
                             
                             Image(systemName: "xmark.circle.fill")
-                            
-                                .background(colorScheme == .dark ? .black: .white) //
+                                .background(colorScheme == .dark ? .black : .white)
                                 .foregroundStyle(.red)
                                 .font(.system(size: 41))
-                                .symbolEffect(
-                                    .wiggle.wholeSymbol, options: .nonRepeating)
+                                .symbolEffect(.wiggle.wholeSymbol, options: .nonRepeating)
                         }
+                        Text("No reminders yet! \n Set one now to stay hydrated!")
+                            .multilineTextAlignment(.center)
                     }
-                    
-                    Text("No reminders yet! \n Set one now to stay hydrated!")
-                        .multilineTextAlignment(.center)
-                    
                 } else {
                     addReminderView()
                 }
             }
-            
-            .pickerStyle(.navigationLink)
             .navigationTitle("Reminder")
-            
             .navigationBarItems(
-                leading: EditButton(),
-                trailing: Button ("Add") {
+                trailing: Button("Add") {
                     menuAddAlarm.toggle()
                 }
             )
-            
             .sheet(isPresented: $menuAddAlarm) {
-                AddAlarmView {
-                    newAlarm in
+                AddAlarmView { newAlarm in
                     let reminder = Reminder(time: newAlarm, isEnabled: true)
-                    listAlarms.append(reminder)//userdef
+                    listAlarms.append(reminder)
                     scheduleNotification(for: reminder)
-                    
                 }
                 .presentationDetents([.medium, .large])
             }
-            
-        }
-        
-        //request izin notif
-        .onAppear() {
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {granted, error in
-                if granted {
-                    print("Notification permission granted")
-                } else if let error = error {
-                    print ("Error requesting permission: \(error.localizedDescription)")
-                }
+            .sheet(item: $selectedReminder) { reminder in
+                EditAlarmView(reminder: Binding(
+                    get: { reminder },
+                    set: { updatedReminder in
+                        if let index = listAlarms.firstIndex(where: { $0.id == updatedReminder.id }) {
+                            listAlarms[index] = updatedReminder
+                            cancelNotification(for: reminder)
+                            if updatedReminder.isEnabled {
+                                scheduleNotification(for: updatedReminder)
+                            }
+                        }
+                        selectedReminder = updatedReminder
+                    }
+                ), saveTime: { _ in
+                 
+                })
+                .presentationDetents([.medium, .large]) // Half-modal screen
             }
-            loadAlarms()
-        }
+            .onAppear {
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                    if granted {
+                        print("Notification permission granted")
+                    } else if let error = error {
+                        print("Error requesting permission: \(error.localizedDescription)")
+                    }
+                }
+                loadAlarms()
+            }
         
+            .padding(15)
+        }
         .tabItem {
             Image(systemName: "alarm.fill")
             Text("Reminder")
         }
-        .padding(15)
     }
-    
     
     private func deleteAlarm(at offsets: IndexSet) {
         listAlarms.remove(atOffsets: offsets)
@@ -114,25 +115,30 @@ struct ReminderView: View {
         return formatter
     }
     
-    private func addReminderView () -> some View {
-        return List (){
+    private func addReminderView() -> some View {
+        List {
             ForEach(listAlarms.indices, id: \.self) { index in
                 HStack {
-                    Text ("\(listAlarms[index].time, formatter: timeFormatter)")
+                    Text("\(listAlarms[index].time, formatter: timeFormatter)")
                         .font(.largeTitle)
-                    //                    Spacer()
-                    Toggle("", isOn: Binding(get: {listAlarms[index].isEnabled},
-                                             set: {newValue in listAlarms[index].isEnabled = newValue
-                        if newValue {
-                            scheduleNotification(for: listAlarms[index])
-                        }else {
-                            cancelNotification(for: listAlarms[index])
+                    Spacer()
+                    Toggle("", isOn: Binding(
+                        get: { listAlarms[index].isEnabled },
+                        set: { newValue in
+                            listAlarms[index].isEnabled = newValue
+                            if newValue {
+                                scheduleNotification(for: listAlarms[index])
+                            } else {
+                                cancelNotification(for: listAlarms[index])
+                            }
                         }
-                    }
-                                            )
-                    ) //constant atur toggle on off
+                    ))
                 }
                 .padding(8)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    selectedReminder = listAlarms[index]
+                }
             }
             .onDelete(perform: deleteAlarm)
         }
@@ -171,7 +177,7 @@ private func scheduleNotification(for reminder: Reminder) {
     dateComponents.minute = minute
     
     let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-
+    
     let request = UNNotificationRequest(identifier: reminder.id.uuidString, content: content, trigger: trigger)
     
     UNUserNotificationCenter.current().add(request) { error in
@@ -184,7 +190,6 @@ private func scheduleNotification(for reminder: Reminder) {
 private func cancelNotification(for reminder: Reminder) {
     UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [reminder.id.uuidString])
 }
-
 
 #Preview {
     ReminderView()
