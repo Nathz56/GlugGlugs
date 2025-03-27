@@ -9,9 +9,9 @@ import SwiftUI
 
 struct HomeView: View {
     
+    @EnvironmentObject var homeViewModel: HomeViewModel
+    
     @State var startAnimation: CGFloat = 0.0
-    @State var progress: Int = 1000
-    @State var goal: Int = 2500
     @State var progressPercentage: CGFloat = 0.0
     @State var isShowEditGoal: Bool = false
     
@@ -26,7 +26,7 @@ struct HomeView: View {
                 AlertBanner(message: "Welcome! 🚀 Set your reminder, target, and tumbler size to stay hydrated! 💧", iconName: "lightbulb.fill", backgroundColor: .yellow.opacity(0.2), foregroundColor: .yellow, textColor: .black)
                     .padding(.bottom, 8)
                 
-                Text("\(progress) ml")
+                Text("\(homeViewModel.progress) ml")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
@@ -37,7 +37,7 @@ struct HomeView: View {
                         .font(.subheadline)
                         .foregroundColor(.gray)
                     +
-                    Text("\(goal) ml ")
+                    Text("\(homeViewModel.goal) ml ")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .bold()
@@ -60,7 +60,7 @@ struct HomeView: View {
                 
                 
                 Button {
-                    progress += 100
+                    homeViewModel.addProgress(100)
                 } label: {
                     Image(systemName: "plus")
                     Text("Add Water")
@@ -75,13 +75,13 @@ struct HomeView: View {
             
         }
         .onAppear {
-            progressPercentage = CGFloat(progress) / CGFloat(goal)
+            progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
         }
-        .onChange(of: progress) {
-            progressPercentage = CGFloat(progress) / CGFloat(goal)
+        .onChange(of: homeViewModel.progress) {
+            progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
         }
-        .onChange(of: goal) {
-            progressPercentage = CGFloat(progress) / CGFloat(goal)
+        .onChange(of: homeViewModel.goal) {
+            progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
         }
         .tabItem {
             Image(systemName: "house.fill")

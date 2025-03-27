@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct GlugGlugApp: App {
+    
+    @StateObject var homeViewModel: HomeViewModel = HomeViewModel()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(homeViewModel)
         }
     }
 }

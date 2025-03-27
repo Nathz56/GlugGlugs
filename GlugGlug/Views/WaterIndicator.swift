@@ -14,8 +14,6 @@ struct WaterIndicator: View {
     
     var body: some View {
         CustomGeometryReaderView { size in
-            
-            
             GeometryReader { proxy in
                 let size = proxy.size
                 ZStack {
