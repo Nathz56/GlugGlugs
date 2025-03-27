@@ -9,8 +9,10 @@ import SwiftUI
 
 struct HomeView: View {
     
-    @State var progress: CGFloat = 0.5
     @State var startAnimation: CGFloat = 0.0
+    @State var progress: Int = 1000
+    @State var goal: Int = 2500
+    @State var progressPercentage: CGFloat = 0.0
     
     var body: some View {
         NavigationStack {
@@ -23,22 +25,61 @@ struct HomeView: View {
                 AlertBanner(message: "Welcome! 🚀 Set your reminder, target, and tumbler size to stay hydrated! 💧", iconName: "lightbulb.fill", backgroundColor: .yellow.opacity(0.2), foregroundColor: .yellow, textColor: .black)
                     .padding(.bottom, 8)
                 
-                Text("0 ml")
+                Text("\(progress) ml")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
                     .padding(.bottom, 2)
                 
-                Text("0% of your target")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+                HStack{
+                    Text("\(Int(progressPercentage * 100))% of your ")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    +
+                    Text("\(goal) ml ")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .bold()
+                    +
+                    Text("goal")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    
+                    Button {
+                        
+                    } label: {
+                        Image(systemName: "square.and.pencil")
+                        
+                    }
+                }
+                .padding(.bottom)
+                
+                WaterIndicator(progress: $progressPercentage, startAnimation: $startAnimation)
                     .padding(.bottom)
                 
-                WaterIndicator(progress: $progress, startAnimation: $startAnimation)
+                Button {
+                    progress += 100
+                } label: {
+                    Image(systemName: "plus")
+                    Text("Add Water")
+                }
+                .buttonStyle(.borderedProminent)
+                
+                Spacer()
+                
             }
             .padding()
             .navigationTitle("GlugGlug!")
             
+        }
+        .onAppear {
+            progressPercentage = CGFloat(progress) / CGFloat(goal)
+        }
+        .onChange(of: progress) {
+            progressPercentage = CGFloat(progress) / CGFloat(goal)
+        }
+        .onChange(of: goal) {
+            progressPercentage = CGFloat(progress) / CGFloat(goal)
         }
         .tabItem {
             Image(systemName: "house.fill")

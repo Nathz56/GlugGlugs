@@ -24,7 +24,7 @@ struct WaterIndicator: View {
                     .scaleEffect(x:1.1, y:1)
                     .offset(y:-1)
                 
-                WaterWave(progress: 0.5, waveHeight: 0.1, offset: startAnimation)
+                WaterWave(progress: progress, waveHeight: 0.1, offset: startAnimation)
                     .fill(Color.blue)
                     .overlay(content: {
                         ZStack {
@@ -68,14 +68,14 @@ struct WaterIndicator: View {
                     }
                 
             }
-            .frame(width: size.width, height: size.height/1.5, alignment: .center)
+            .frame(width: size.width, height: size.height, alignment: .center)
             .onAppear {
-                
                 withAnimation(.linear(duration: 3).repeatForever(autoreverses: false)) {
                     startAnimation = size.width
                 }
             }
         }
+        .frame(height: UIScreen.main.bounds.height/3)
     }
 }
 
