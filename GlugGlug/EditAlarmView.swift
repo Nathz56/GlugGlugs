@@ -8,34 +8,53 @@
 import SwiftUI
 
 struct EditAlarmView: View {
-    
     @Environment(\.dismiss) var dismiss
     @Binding var reminder: Reminder
-    //    @Binding var reminderView: ReminderView
-    @State var saveTime: (Reminder) -> Void
+    @State private var tempTime: Date // Variabel sementara untuk menyimpan waktu
+    let saveTime: (Reminder) -> Void
     
     let buttonText = "Save Changes"
+    
+    init(reminder: Binding<Reminder>, saveTime: @escaping (Reminder) -> Void) {
+        self._reminder = reminder
+        self.saveTime = saveTime
+        self._tempTime = State(initialValue: reminder.wrappedValue.time) // Inisialisasi dengan waktu awal
+    }
+    
     var body: some View {
-        
-        VStack(alignment: .center) {
-            Text ("Edit Alarm")
-                .font(.title)
-            DatePicker("Select Time", selection: $reminder.time, displayedComponents: .hourAndMinute)
-                .datePickerStyle(.wheel)
-                .labelsHidden()
-                .padding()
-            
-            HStack(alignment: .center) {
-                Button ("Save Changes"){
-                    saveTime(reminder)
-                    dismiss()
-                } .buttonStyle(.borderedProminent)
+        NavigationStack {
+            VStack(alignment: .center) {
+                HStack {
+                    Spacer()
+                    Button("Cancel") {
+                        dismiss()
+                    }.buttonStyle(.borderless)
+                    Spacer()
+                    Spacer()
+                    Text("Edit Alarm")
+                        .font(.title2)
+                        .bold()
+                    Spacer()
+                    Spacer()
+                    Button("Save") {
+                        reminder.time = tempTime // Update waktu hanya saat tombol ditekan
+                        saveTime(reminder)
+                        dismiss()
+                    }.buttonStyle(.borderedProminent)
+                    Spacer()
+                }
+                
+                
+                DatePicker("Select Time", selection: $tempTime, displayedComponents: .hourAndMinute)
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
+                    .padding()
+//                Spacer()
             }
         }
     }
 }
 
-
 #Preview {
-    EditAlarmView(reminder: .constant(Reminder(time: Date(), isEnabled: true))) {_ in}
+    EditAlarmView(reminder: .constant(Reminder(time: Date(), isEnabled: true))) { _ in }
 }

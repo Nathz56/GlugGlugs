@@ -30,7 +30,7 @@ struct ReminderView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(alignment: .leading, spacing: 0) {
                 if listAlarms.isEmpty {
                     VStack {
                         ZStack(alignment: .bottomTrailing) {
@@ -50,41 +50,42 @@ struct ReminderView: View {
                         Text("No reminders yet! \n Set one now to stay hydrated!")
                             .multilineTextAlignment(.center)
                     }
+                    .frame(maxWidth: .infinity)
                 } else {
                     addReminderView()
                 }
             }
             .navigationTitle("Reminder")
-            .navigationBarItems(
-                trailing: Button("Add") {
-                    menuAddAlarm.toggle()
-                }
-            )
+            .navigationBarItems(leading: EditButton(),
+                            trailing: Button("Add") {
+                                menuAddAlarm.toggle()
+                            }
+                        )
             .sheet(isPresented: $menuAddAlarm) {
                 AddAlarmView { newAlarm in
                     let reminder = Reminder(time: newAlarm, isEnabled: true)
                     listAlarms.append(reminder)
+                    sortAlarms()
                     scheduleNotification(for: reminder)
                 }
-                .presentationDetents([.medium, .large])
+                .presentationDetents([.height(350)])
             }
             .sheet(item: $selectedReminder) { reminder in
                 EditAlarmView(reminder: Binding(
-                    get: { reminder },
+                    get: { reminder }, //ambil jamnya
                     set: { updatedReminder in
-                        if let index = listAlarms.firstIndex(where: { $0.id == updatedReminder.id }) {
-                            listAlarms[index] = updatedReminder
-                            cancelNotification(for: reminder)
+                        if let index = listAlarms.firstIndex(where: { $0.id == updatedReminder.id }) { //nyari alarm di array dari id 0 satu satu di iterate
+                            listAlarms[index] = updatedReminder //array ketemu baru direplace sama reminder baru
+                            sortAlarms()
+                            cancelNotification(for: reminder) //cancel notif alarm sblmnya
                             if updatedReminder.isEnabled {
-                                scheduleNotification(for: updatedReminder)
+                                scheduleNotification(for: updatedReminder) //schedulebuat alarm baru
                             }
                         }
                         selectedReminder = updatedReminder
                     }
-                ), saveTime: { _ in
-                 
-                })
-                .presentationDetents([.medium, .large]) // Half-modal screen
+                ), saveTime: { _ in }) //closure kosong buat editalarmview, kalo logicnya ttp di struct atas
+                .presentationDetents([.height(330)])
             }
             .onAppear {
                 UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
@@ -96,8 +97,6 @@ struct ReminderView: View {
                 }
                 loadAlarms()
             }
-        
-            .padding(15)
         }
         .tabItem {
             Image(systemName: "alarm.fill")
@@ -106,7 +105,12 @@ struct ReminderView: View {
     }
     
     private func deleteAlarm(at offsets: IndexSet) {
+        let remindersToDelete = offsets.map { listAlarms[$0] }
         listAlarms.remove(atOffsets: offsets)
+        for reminder in remindersToDelete {
+                cancelNotification(for: reminder)
+            }
+        sortAlarms()
     }
     
     private var timeFormatter: DateFormatter {
@@ -120,7 +124,7 @@ struct ReminderView: View {
             ForEach(listAlarms.indices, id: \.self) { index in
                 HStack {
                     Text("\(listAlarms[index].time, formatter: timeFormatter)")
-                        .font(.largeTitle)
+                        .font(.system(size: 40))
                     Spacer()
                     Toggle("", isOn: Binding(
                         get: { listAlarms[index].isEnabled },
@@ -132,10 +136,11 @@ struct ReminderView: View {
                                 cancelNotification(for: listAlarms[index])
                             }
                         }
-                    ))
+                    )) .tint(.blue)
                 }
-                .padding(8)
+                .padding(.vertical, 8)
                 .contentShape(Rectangle())
+                .opacity(listAlarms[index].isEnabled ? 1.0 : 0.6)
                 .onTapGesture {
                     selectedReminder = listAlarms[index]
                 }
@@ -158,29 +163,36 @@ struct ReminderView: View {
             listAlarms = decoded
         }
     }
+    
+    private func sortAlarms() {
+        listAlarms.sort { $0.time < $1.time }
+    }
 }
 
 private func scheduleNotification(for reminder: Reminder) {
-    guard reminder.isEnabled else { return }
+    guard reminder.isEnabled else { return } //cek ke enable ga jamnya, kalo ga yaudah gausah di schedule
+    
+    
+    
     
     let content = UNMutableNotificationContent()
-    content.title = "Time to Hydrate!"
-    content.body = "Don't forget to drink water"
+    content.title = "It's Glug Glug time !!!"
+    content.body = "Even you are busy, don't forget it's time to rehydrate so you can perform better!"
     content.sound = .default
     
     let calendar = Calendar.current
-    let hour = calendar.component(.hour, from: reminder.time)
-    let minute = calendar.component(.minute, from: reminder.time)
+    let hour = calendar.component(.hour, from: reminder.time) //block ini untuk ngetake user current calendar
+    let minute = calendar.component(.minute, from: reminder.time) //berdasarkan local timezonenya
     
     var dateComponents = DateComponents()
     dateComponents.hour = hour
     dateComponents.minute = minute
     
-    let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+    let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true) //trigger notif ketika sudah match dengan time yg diset di datecomponent
     
-    let request = UNNotificationRequest(identifier: reminder.id.uuidString, content: content, trigger: trigger)
+    let request = UNNotificationRequest(identifier: reminder.id.uuidString, content: content, trigger: trigger) //creates a notification requst
     
-    UNUserNotificationCenter.current().add(request) { error in
+    UNUserNotificationCenter.current().add(request) { error in //access app notif manager //add request buat schedule notifnya
         if let error = error {
             print("❌ Error scheduling notification: \(error.localizedDescription)")
         }
