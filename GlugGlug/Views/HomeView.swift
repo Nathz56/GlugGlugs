@@ -13,6 +13,7 @@ struct HomeView: View {
     @State var progress: Int = 1000
     @State var goal: Int = 2500
     @State var progressPercentage: CGFloat = 0.0
+    @State var isShowEditGoal: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -46,7 +47,7 @@ struct HomeView: View {
                         .foregroundColor(.gray)
                     
                     Button {
-                        
+                        isShowEditGoal.toggle()
                     } label: {
                         Image(systemName: "square.and.pencil")
                         
@@ -56,6 +57,7 @@ struct HomeView: View {
                 
                 WaterIndicator(progress: $progressPercentage, startAnimation: $startAnimation)
                     .padding(.bottom)
+                
                 
                 Button {
                     progress += 100
@@ -85,9 +87,20 @@ struct HomeView: View {
             Image(systemName: "house.fill")
             Text("Home")
         }
+        .sheet(isPresented: $isShowEditGoal,
+               onDismiss: didDismiss) {
+            EditGoalView()
+        }
         
     }
+    
+    func didDismiss() {
+        // Handle the dismissing action.
+    }
+    
 }
+
+
 
 #Preview {
     HomeView()
