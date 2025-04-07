@@ -12,6 +12,7 @@ struct StatisticView: View {
     @StateObject var healthKitManager = HealthKitManager.shared
     @State private var selectedMode: StatisticMode = .weekly
     @State private var streak: Int = 0
+    @State private var goalAchieved: Int = 0
     
     var body: some View {
         NavigationStack{
@@ -30,7 +31,7 @@ struct StatisticView: View {
                     Spacer()
                     StatisticInformationView(title: "Streak (Day)", value: "\(streak)", imageName: "drop.fill")
                     Spacer()
-                    StatisticInformationView(title: "Goal Achieved", value: "3", imageName: "target")
+                    StatisticInformationView(title: "Goal Achieved", value: "\(goalAchieved)", imageName: "target")
                     Spacer()
                 }
                 Spacer()
@@ -67,6 +68,9 @@ struct StatisticView: View {
         .onAppear {
             HealthKitManager.shared.getStreak { streak in
                 self.streak = streak
+            }
+            HealthKitManager.shared.getGoalAchieved { goal in
+                self.goalAchieved = goal
             }
         }
         .tabItem {
