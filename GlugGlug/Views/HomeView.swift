@@ -19,6 +19,8 @@ struct HomeView: View {
     
     @State private var selectedIndex: Int = 2
     
+    @State private var progress: Int = 0
+    
     var body: some View {
         NavigationStack {
             VStack () {
@@ -33,7 +35,7 @@ struct HomeView: View {
                     .padding(.bottom, 8)
                     .padding(.horizontal)
                 
-                Text("\(homeViewModel.progress) ml")
+                Text("\(progress) ml")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
@@ -69,15 +71,15 @@ struct HomeView: View {
                 
                 Button {
                     let amount = homeViewModel.glassOptions[selectedIndex].amount
-                    homeViewModel.addProgress(amount)
+                    HealthKitManager.shared.addWaterAmount(volume: Double(amount))
+                    HealthKitManager.shared.getConsumedWaterToday { data in DispatchQueue.main.async {
+                        self.progress = data ?? 0
+                    }}
                 } label: {
                     Image(systemName: "plus")
                     Text("Add \(homeViewModel.glassOptions[selectedIndex].amount) ml")
                 }
                 .buttonStyle(.borderedProminent)
-                
-                
-                
                 Spacer()
                 
             }
@@ -86,26 +88,31 @@ struct HomeView: View {
         }
         .onAppear {
             if homeViewModel.goal > 0 {
-                progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+                progressPercentage = CGFloat(progress) / CGFloat(homeViewModel.goal)
             } else {
                 progressPercentage = 0.0
             }
-
+            
+            HealthKitManager.shared.getConsumedWaterToday { data in DispatchQueue.main.async {
+                self.progress = data ?? 0
+            }}
+            
         }
-        .onChange(of: homeViewModel.progress) {
+        .onChange(of: progress) {
             if homeViewModel.goal > 0 {
-                progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+                progressPercentage = CGFloat(progress) / CGFloat(homeViewModel.goal)
             } else {
                 progressPercentage = 0.0
             }
         }
         .onChange(of: homeViewModel.goal) {
             if homeViewModel.goal > 0 {
-                progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+                progressPercentage = CGFloat(progress) / CGFloat(homeViewModel.goal)
             } else {
                 progressPercentage = 0.0
             }
         }
+        
         .tabItem {
             Image(systemName: "house.fill")
             Text("Home")
@@ -135,8 +142,6 @@ struct HomeView: View {
         return closestIndex
     }
 }
-
-
 
 #Preview {
     HomeView()
