@@ -42,15 +42,6 @@ class HealthKitManager: ObservableObject {
     
     private var healthStore = HKHealthStore()
      
-    
-    var thisWeekRecord: [Int: Int] = [1: 0,
-                                      2: 0,
-                                      3: 0,
-                                      4: 0,
-                                      5: 0,
-                                      6: 0,
-                                      7: 0]
-    
     init() {
         requestAuthorization()
     }
@@ -323,15 +314,6 @@ class HealthKitManager: ObservableObject {
             }
         }
         healthStore.execute(query)
-    }
-    
-    func getStatistic(completion: @escaping ([(date: String, volume: Int)]) -> Void) {
-        guard let quantityType = self.waterType else {
-            print("Error: Unable to get dietaryWater type")
-            completion([])
-            return
-        }
-        
     }
     
 }
