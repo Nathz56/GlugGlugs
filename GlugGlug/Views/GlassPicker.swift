@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SnapCarousel: View {
+struct GlassPicker: View {
     let items: [GlassOption]
     @Binding var selectedIndex: Int
 
@@ -78,6 +78,6 @@ struct SnapCarousel: View {
                 )
             }
         }
-        .frame(height: 100)
+        .frame(height: 90)
     }
 }

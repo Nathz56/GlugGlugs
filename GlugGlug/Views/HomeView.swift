@@ -67,7 +67,7 @@ struct HomeView: View {
                 WaterIndicator(progress: $progressPercentage, startAnimation: $startAnimation)
                     .padding(.bottom, 8)
                 
-                SnapCarousel(items: homeViewModel.glassOptions, selectedIndex: $selectedIndex)
+                GlassPicker(items: homeViewModel.glassOptions, selectedIndex: $selectedIndex)
                 
                 Button {
                     HealthKitManager.shared.addWaterAmount(volume: Double(homeViewModel.glassOptions[selectedIndex].amount))
