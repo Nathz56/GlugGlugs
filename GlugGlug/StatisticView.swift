@@ -28,7 +28,7 @@ struct StatisticView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    StatisticInformationView(title: "Streak", value: "7 Days", imageName: "drop.fill")
+                    StatisticInformationView(title: "Streak (Day)", value: "7", imageName: "drop.fill")
                     Spacer()
                     StatisticInformationView(title: "Goal Achieved", value: "3", imageName: "target")
                     Spacer()
@@ -79,15 +79,15 @@ struct StatisticInformationView: View {
     var body: some View {
         HStack {
             VStack {
-                Text(title)
-                Text(value)
+                Text(title).font(.callout).italic()
+                Text(value).bold()
             }
             Image(systemName: imageName)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 35, height: 35)
                 .foregroundColor(.blue)
-            
+                .symbolEffect(.bounce)
         }
         .padding()
         .overlay(RoundedRectangle(cornerRadius: 4).stroke(lineWidth: 2).foregroundColor(.blue))
