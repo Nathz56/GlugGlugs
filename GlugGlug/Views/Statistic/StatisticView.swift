@@ -11,7 +11,8 @@ import Charts
 struct StatisticView: View {
     @StateObject var healthKitManager = HealthKitManager.shared
     @State private var selectedMode: StatisticMode = .weekly
-    @State private var weeksData: [(String, Int)] = []
+    @State private var streak: Int = 0
+    @State private var goalAchieved: Int = 0
     
     var body: some View {
         NavigationStack{
@@ -28,9 +29,9 @@ struct StatisticView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    StatisticInformationView(title: "Streak", value: "7 Days", imageName: "drop.fill")
+                    StatisticInformationView(title: "Streak (Day)", value: "\(streak)", imageName: "drop.fill")
                     Spacer()
-                    StatisticInformationView(title: "Goal Achieved", value: "3", imageName: "target")
+                    StatisticInformationView(title: "Goal Achieved", value: "\(goalAchieved)", imageName: "target")
                     Spacer()
                 }
                 Spacer()
@@ -64,6 +65,14 @@ struct StatisticView: View {
             }
             .padding(.top, 20)
         }
+        .onAppear {
+            HealthKitManager.shared.getStreak { streak in
+                self.streak = streak
+            }
+            HealthKitManager.shared.getGoalAchieved { goal in
+                self.goalAchieved = goal
+            }
+        }
         .tabItem {
             Image(systemName: "chart.bar.fill")
             Text("Statistic")
@@ -79,15 +88,15 @@ struct StatisticInformationView: View {
     var body: some View {
         HStack {
             VStack {
-                Text(title)
-                Text(value)
+                Text(title).font(.callout).italic()
+                Text(value).bold()
             }
             Image(systemName: imageName)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 35, height: 35)
                 .foregroundColor(.blue)
-            
+                .symbolEffect(.bounce)
         }
         .padding()
         .overlay(RoundedRectangle(cornerRadius: 4).stroke(lineWidth: 2).foregroundColor(.blue))

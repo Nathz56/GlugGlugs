@@ -7,7 +7,6 @@
 
 import Foundation
 import HealthKit
-import WidgetKit
 
 extension Notification.Name {
     static let waterDataUpdated = Notification.Name("waterDataUpdated")
@@ -41,15 +40,6 @@ class HealthKitManager: ObservableObject {
     private let waterType = HKQuantityType.quantityType(forIdentifier: .dietaryWater)
     
     private var healthStore = HKHealthStore()
-     
-    
-    var thisWeekRecord: [Int: Int] = [1: 0,
-                                      2: 0,
-                                      3: 0,
-                                      4: 0,
-                                      5: 0,
-                                      6: 0,
-                                      7: 0]
     
     init() {
         requestAuthorization()
@@ -193,7 +183,7 @@ class HealthKitManager: ObservableObject {
         
         let endOfWeek = calendar.date(byAdding: .day, value: 6 - daysSinceMonday, to: now)!
         let endOfWeekMidnight = calendar.startOfDay(for: endOfWeek)
-
+        
         let predicate = HKQuery.predicateForSamples(withStart: startOfWeekMidnight, end: now, options: .strictStartDate)
         
         let query = HKStatisticsCollectionQuery(
@@ -214,7 +204,7 @@ class HealthKitManager: ObservableObject {
             var drinkData: [(date: String, volume: Int)] = []
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "EEE"
-                    
+            
             statsCollection.enumerateStatistics(from: startOfWeekMidnight, to: endOfWeekMidnight) { statistics, _ in
                 let date = statistics.startDate
                 let dateString = dateFormatter.string(from: date)
@@ -262,7 +252,7 @@ class HealthKitManager: ObservableObject {
             var drinkData: [(date: String, volume: Int)] = []
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "dd"
-                    
+            
             statsCollection.enumerateStatistics(from: startOfMonth, to: endOfMonth) { statistics, _ in
                 let date = statistics.startDate
                 let dateString = dateFormatter.string(from: date)
@@ -289,7 +279,7 @@ class HealthKitManager: ObservableObject {
         
         let startOfYear = calendar.date(from: calendar.dateComponents([.year], from: now))!
         let endOfYear = calendar.date(byAdding: DateComponents(year: 1, day: -1), to: startOfYear)!
-
+        
         let predicate = HKQuery.predicateForSamples(withStart: startOfYear, end: now, options: .strictStartDate)
         
         let query = HKStatisticsCollectionQuery(
@@ -310,7 +300,7 @@ class HealthKitManager: ObservableObject {
             var drinkData: [(date: String, volume: Int)] = []
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "MMM"
-                    
+            
             statsCollection.enumerateStatistics(from: startOfYear, to: endOfYear) { statistics, _ in
                 let date = statistics.startDate
                 let dateString = dateFormatter.string(from: date)
@@ -325,13 +315,112 @@ class HealthKitManager: ObservableObject {
         healthStore.execute(query)
     }
     
-    func getStatistic(completion: @escaping ([(date: String, volume: Int)]) -> Void) {
+    func getStreak(completion: @escaping (Int) -> Void) {
+        let goal = UserDefaults.standard.integer(forKey: "goal")
+        let calendar = Calendar.current
+        let now = Date()
+        let anchorDate = calendar.startOfDay(for: now)
+        
         guard let quantityType = self.waterType else {
             print("Error: Unable to get dietaryWater type")
-            completion([])
+            completion(0)
             return
         }
+                
+        let query = HKStatisticsCollectionQuery(
+            quantityType: quantityType,
+            quantitySamplePredicate: nil,
+            options: .cumulativeSum,
+            anchorDate: anchorDate,
+            intervalComponents: DateComponents(day: 1)
+        )
         
+        query.initialResultsHandler = { _, results, error in
+            guard let statsCollection = results else {
+                print("Error fetching water intake: \(error?.localizedDescription ?? "Unknown error")")
+                completion(0)
+                return
+            }
+            
+            var streak = 0
+            var previousDate: Date?
+
+            
+            for statistics in statsCollection.statistics() {
+                let date = calendar.startOfDay(for: statistics.startDate)
+                let waterConsumption = statistics.sumQuantity()?.doubleValue(for: self.volumeUnit) ?? 0.0
+                                
+                if let previous = previousDate {
+                    if let expectedDate = calendar.date(byAdding: .day, value: -1, to: previous),
+                       date != expectedDate {
+                        break
+                    }
+                }
+                
+                if waterConsumption >= Double(goal) {
+                    streak += 1
+                } else {
+                    break
+                }
+                
+                previousDate = date
+            }
+
+            DispatchQueue.main.async {
+                completion(streak)
+            }
+        }
+        
+        healthStore.execute(query)
     }
     
+    func getGoalAchieved(completion: @escaping (Int) -> Void) {
+        let goal = UserDefaults.standard.integer(forKey: "goal")
+        let calendar = Calendar.current
+        let now = Date()
+        let anchorDate = calendar.startOfDay(for: now)
+        
+        guard let quantityType = self.waterType else {
+            print("Error: Unable to get dietaryWater type")
+            completion(0)
+            return
+        }
+                
+        let query = HKStatisticsCollectionQuery(
+            quantityType: quantityType,
+            quantitySamplePredicate: nil,
+            options: .cumulativeSum,
+            anchorDate: anchorDate,
+            intervalComponents: DateComponents(day: 1)
+        )
+        
+        query.initialResultsHandler = { _, results, error in
+            guard let statsCollection = results else {
+                print("Error fetching water intake: \(error?.localizedDescription ?? "Unknown error")")
+                completion(0)
+                return
+            }
+            
+            var goalAchieved = 0
+            
+            for statistics in statsCollection.statistics() {
+                if let sum = statistics.sumQuantity() {
+                    let liter = sum.doubleValue(for: self.volumeUnit)
+                    if liter >= Double(goal) {
+                        goalAchieved += 1
+                    } else {
+                        break
+                    }
+                } else {
+                    break
+                }
+            }
+
+            DispatchQueue.main.async {
+                completion(goalAchieved)
+            }
+        }
+        
+        healthStore.execute(query)
+    }
 }

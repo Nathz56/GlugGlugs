@@ -34,7 +34,6 @@ struct HomeView: View {
     
     @State private var progress: Int = 0
     
-    
     var body: some View {
         NavigationStack {
             VStack () {
