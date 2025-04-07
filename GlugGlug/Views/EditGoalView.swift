@@ -53,6 +53,8 @@ struct EditGoalView: View {
 
 struct RecommendationView: View {
     @State private var selectedWeight: Int = 50
+    @EnvironmentObject var homeViewModel: HomeViewModel
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack {
@@ -84,16 +86,25 @@ struct RecommendationView: View {
             Spacer()
             
             Button {
-                
+                homeViewModel.editGoal(Int(calculateDailyWaterRequirement(weightKg: Double(selectedWeight))))
+                dismiss()
             } label: {
-                Text("Set your target: \(selectedWeight) Kg")
+                Text("Set your target: \(calculateDailyWaterRequirement(weightKg: Double(selectedWeight))) ml")
             }
             .buttonStyle(.borderedProminent)
-            
-            
-            
         }
     }
+    
+    func calculateDailyWaterRequirement(weightKg: Double) -> Int {
+        if weightKg <= 10 {
+            return Int(weightKg * 100)
+        } else if weightKg <= 20 {
+            return Int((10 * 100) + ((weightKg - 10) * 50))
+        } else {
+            return Int((10 * 100) + (10 * 50) + ((weightKg - 20) * 20))
+        }
+    }
+
 }
 
 struct CustomView: View {
