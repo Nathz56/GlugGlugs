@@ -83,7 +83,6 @@ struct HomeView: View {
                 GlassPicker(items: homeViewModel.glassOptions, selectedIndex: $selectedIndex,
                             onTap: {
                     activeSheet = .editGlass
-                    selectedIndex = 0
                 })
                 
                 Button {
@@ -134,15 +133,20 @@ struct HomeView: View {
             Text("Home")
         }
         .sheet(item: $activeSheet) { item in
-            switch item {
-            case .editGoal:
-                EditGoalView()
-            case .editGlass:
-                GlassOptionEditorView()
-            }
+            sheetView(for: item)
         }
 
         
+    }
+    
+    @ViewBuilder
+    func sheetView(for item: ActiveSheet) -> some View {
+        switch item {
+        case .editGoal:
+            EditGoalView()
+        case .editGlass:
+            EditGlassView(selectedIndex: $selectedIndex)
+        }
     }
     
     func didDismiss() {
