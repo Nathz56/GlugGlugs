@@ -17,7 +17,7 @@ struct HomeView: View {
     
     @State private var selectedGlassAmount: Int = 100
     
-    @State private var selectedIndex: Int = 2
+    @State private var selectedIndex: Int = 0
     
     @State private var progress: Int = 0
     
