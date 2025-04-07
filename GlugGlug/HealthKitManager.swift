@@ -9,6 +9,10 @@ import Foundation
 import HealthKit
 import WidgetKit
 
+extension Notification.Name {
+    static let waterDataUpdated = Notification.Name("waterDataUpdated")
+}
+
 enum TimePeriod {
     case week
     case month
@@ -126,6 +130,51 @@ class HealthKitManager: ObservableObject {
         }
         healthStore.execute(query)
     }
+    
+    func startObservingWaterIntake(updateHandler: @escaping (Int) -> Void) {
+        guard let waterType = HKObjectType.quantityType(forIdentifier: .dietaryWater) else { return }
+
+        let observerQuery = HKObserverQuery(sampleType: waterType, predicate: nil) { _, _, error in
+            if let error = error {
+                print("Observer error: \(error.localizedDescription)")
+                return
+            }
+
+            self.getConsumedWaterToday { total in
+                DispatchQueue.main.async {
+                    updateHandler(total ?? 0)
+                }
+            }
+        }
+
+        healthStore.execute(observerQuery)
+
+        // Background delivery
+        healthStore.enableBackgroundDelivery(for: waterType, frequency: .immediate) { success, error in
+            if !success {
+                print("Background delivery failed: \(error?.localizedDescription ?? "Unknown error")")
+            }
+        }
+    }
+
+    
+    func fetchLatestWaterIntake() {
+        guard let waterType = HKObjectType.quantityType(forIdentifier: .dietaryWater) else { return }
+
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+        let query = HKSampleQuery(sampleType: waterType, predicate: nil, limit: 1, sortDescriptors: [sortDescriptor]) { _, samples, error in
+            guard let samples = samples as? [HKQuantitySample], let latestSample = samples.first else {
+                print("No water data found")
+                return
+            }
+
+            let intakeInLiters = latestSample.quantity.doubleValue(for: HKUnit.literUnit(with: .milli))
+            print("Latest water intake: \(intakeInLiters) mL")
+        }
+
+        healthStore.execute(query)
+    }
+
     
     func getThisWeekStatistic(completion: @escaping ([(date: String, volume: Int)]) -> Void){
         guard let quantityType = self.waterType else {

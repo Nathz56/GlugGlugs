@@ -70,11 +70,7 @@ struct HomeView: View {
                 SnapCarousel(items: homeViewModel.glassOptions, selectedIndex: $selectedIndex)
                 
                 Button {
-                    let amount = homeViewModel.glassOptions[selectedIndex].amount
-                    HealthKitManager.shared.addWaterAmount(volume: Double(amount))
-                    HealthKitManager.shared.getConsumedWaterToday { data in DispatchQueue.main.async {
-                        self.progress = data ?? 0
-                    }}
+                    HealthKitManager.shared.addWaterAmount(volume: Double(homeViewModel.glassOptions[selectedIndex].amount))
                 } label: {
                     Image(systemName: "plus")
                     Text("Add \(homeViewModel.glassOptions[selectedIndex].amount) ml")
@@ -97,6 +93,10 @@ struct HomeView: View {
                 self.progress = data ?? 0
             }}
             
+            HealthKitManager.shared.startObservingWaterIntake { newProgress in
+                self.progress = newProgress
+            }
+            
         }
         .onChange(of: progress) {
             if homeViewModel.goal > 0 {
@@ -112,7 +112,6 @@ struct HomeView: View {
                 progressPercentage = 0.0
             }
         }
-        
         .tabItem {
             Image(systemName: "house.fill")
             Text("Home")
