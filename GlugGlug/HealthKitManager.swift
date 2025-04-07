@@ -368,8 +368,57 @@ class HealthKitManager: ObservableObject {
             }
 
             DispatchQueue.main.async {
-                print(streak)
                 completion(streak)
+            }
+        }
+        
+        healthStore.execute(query)
+    }
+    
+    func getGoalAchieved(completion: @escaping (Int) -> Void) {
+        let goal = UserDefaults.standard.integer(forKey: "goal")
+        let calendar = Calendar.current
+        let now = Date()
+        let anchorDate = calendar.startOfDay(for: now)
+        
+        guard let quantityType = self.waterType else {
+            print("Error: Unable to get dietaryWater type")
+            completion(0)
+            return
+        }
+                
+        let query = HKStatisticsCollectionQuery(
+            quantityType: quantityType,
+            quantitySamplePredicate: nil,
+            options: .cumulativeSum,
+            anchorDate: anchorDate,
+            intervalComponents: DateComponents(day: 1)
+        )
+        
+        query.initialResultsHandler = { _, results, error in
+            guard let statsCollection = results else {
+                print("Error fetching water intake: \(error?.localizedDescription ?? "Unknown error")")
+                completion(0)
+                return
+            }
+            
+            var goalAchieved = 0
+            
+            for statistics in statsCollection.statistics() {
+                if let sum = statistics.sumQuantity() {
+                    let liter = sum.doubleValue(for: self.volumeUnit)
+                    if liter >= Double(goal) {
+                        goalAchieved += 1
+                    } else {
+                        break
+                    }
+                } else {
+                    break
+                }
+            }
+
+            DispatchQueue.main.async {
+                completion(goalAchieved)
             }
         }
         
