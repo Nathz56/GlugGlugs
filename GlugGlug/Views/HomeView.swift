@@ -7,19 +7,33 @@
 
 import SwiftUI
 
+enum ActiveSheet: Identifiable {
+    case editGoal
+    case editGlass
+
+    var id: String {
+        switch self {
+        case .editGoal: return "editGoal"
+        case .editGlass: return "editGlass"
+        }
+    }
+}
+
+
 struct HomeView: View {
     
     @EnvironmentObject var homeViewModel: HomeViewModel
     
     @State var startAnimation: CGFloat = 0.0
     @State var progressPercentage: CGFloat = 0.0
-    @State var isShowEditGoal: Bool = false
+    @State private var activeSheet: ActiveSheet?
     
     @State private var selectedGlassAmount: Int = 100
     
     @State private var selectedIndex: Int = 0
     
     @State private var progress: Int = 0
+    
     
     var body: some View {
         NavigationStack {
@@ -56,7 +70,7 @@ struct HomeView: View {
                         .foregroundColor(.gray)
                     
                     Button {
-                        isShowEditGoal.toggle()
+                        activeSheet = .editGoal
                     } label: {
                         Image(systemName: "square.and.pencil")
                         
@@ -67,7 +81,11 @@ struct HomeView: View {
                 WaterIndicator(progress: $progressPercentage, startAnimation: $startAnimation)
                     .padding(.bottom, 8)
                 
-                GlassPicker(items: homeViewModel.glassOptions, selectedIndex: $selectedIndex)
+                GlassPicker(items: homeViewModel.glassOptions, selectedIndex: $selectedIndex,
+                            onTap: {
+                    activeSheet = .editGlass
+                    selectedIndex = 0
+                })
                 
                 Button {
                     HealthKitManager.shared.addWaterAmount(volume: Double(homeViewModel.glassOptions[selectedIndex].amount))
@@ -116,10 +134,15 @@ struct HomeView: View {
             Image(systemName: "house.fill")
             Text("Home")
         }
-        .sheet(isPresented: $isShowEditGoal,
-               onDismiss: didDismiss) {
-            EditGoalView()
+        .sheet(item: $activeSheet) { item in
+            switch item {
+            case .editGoal:
+                EditGoalView()
+            case .editGlass:
+                GlassOptionEditorView()
+            }
         }
+
         
     }
     
