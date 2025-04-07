@@ -16,10 +16,11 @@ class ColorScheme {
 
 struct GlugGlugApp: App {
     @Environment(\.colorScheme) var colorScheme
+    @StateObject var homeViewModel: HomeViewModel = HomeViewModel()
     var body: some Scene {
         WindowGroup {
             ContentView()
-//                .environment()
+                .environmentObject(homeViewModel)
         }
     }
 }
