@@ -26,7 +26,7 @@ struct AlertBanner: View {
             
             Spacer() // Untuk mendorong elemen ke kiri dan kanan
         }
-        .padding()
+        .padding(12)
         .background(backgroundColor)
     }
 }

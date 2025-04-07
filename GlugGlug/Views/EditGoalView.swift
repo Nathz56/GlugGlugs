@@ -32,7 +32,7 @@ struct EditGoalView: View {
                 Spacer()
             }
             .padding(.horizontal)
-            .presentationDetents([.fraction(0.55)])
+            .presentationDetents([.fraction(0.56)])
             .toolbar {
                 ToolbarItem(placement: .principal) { // Title di tengah
                     Text("Edit Goal")

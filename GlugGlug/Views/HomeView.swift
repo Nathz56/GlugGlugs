@@ -15,16 +15,23 @@ struct HomeView: View {
     @State var progressPercentage: CGFloat = 0.0
     @State var isShowEditGoal: Bool = false
     
+    @State private var selectedGlassAmount: Int = 100
+    
+    @State private var selectedIndex: Int = 2
+    
     var body: some View {
         NavigationStack {
             VStack () {
                 Text("⏰ No reminders set! Add one to stay on track! 💧")
                     .font(.subheadline)
-                    .padding(.bottom, 8)
+                    .padding(.vertical, 8)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                
+                    .padding(.horizontal)
                 
                 AlertBanner(message: "Welcome! 🚀 Set your reminder, target, and tumbler size to stay hydrated! 💧", iconName: "lightbulb.fill", backgroundColor: .yellow.opacity(0.2), foregroundColor: .yellow, textColor: .black)
                     .padding(.bottom, 8)
+                    .padding(.horizontal)
                 
                 Text("\(homeViewModel.progress) ml")
                     .font(.title)
@@ -56,32 +63,48 @@ struct HomeView: View {
                 .padding(.bottom)
                 
                 WaterIndicator(progress: $progressPercentage, startAnimation: $startAnimation)
-                    .padding(.bottom)
+                    .padding(.bottom, 8)
                 
+                SnapCarousel(items: homeViewModel.glassOptions, selectedIndex: $selectedIndex)
                 
                 Button {
-                    homeViewModel.addProgress(100)
+                    let amount = homeViewModel.glassOptions[selectedIndex].amount
+                    homeViewModel.addProgress(amount)
                 } label: {
                     Image(systemName: "plus")
-                    Text("Add Water")
+                    Text("Add \(homeViewModel.glassOptions[selectedIndex].amount) ml")
                 }
                 .buttonStyle(.borderedProminent)
+                
+                
                 
                 Spacer()
                 
             }
-            .padding()
             .navigationTitle("GlugGlug!")
             
         }
         .onAppear {
-            progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+            if homeViewModel.goal > 0 {
+                progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+            } else {
+                progressPercentage = 0.0
+            }
+
         }
         .onChange(of: homeViewModel.progress) {
-            progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+            if homeViewModel.goal > 0 {
+                progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+            } else {
+                progressPercentage = 0.0
+            }
         }
         .onChange(of: homeViewModel.goal) {
-            progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+            if homeViewModel.goal > 0 {
+                progressPercentage = CGFloat(homeViewModel.progress) / CGFloat(homeViewModel.goal)
+            } else {
+                progressPercentage = 0.0
+            }
         }
         .tabItem {
             Image(systemName: "house.fill")
@@ -98,12 +121,26 @@ struct HomeView: View {
         // Handle the dismissing action.
     }
     
+    func getClosestIndex(to center: CGFloat, in geo: GeometryProxy) -> Int {
+        var closestIndex = 0
+        var minDistance = CGFloat.infinity
+        for (i, _) in homeViewModel.glassOptions.enumerated() {
+            let itemMid = geo.frame(in: .global).midX
+            let distance = abs(itemMid - center)
+            if distance < minDistance {
+                minDistance = distance
+                closestIndex = i
+            }
+        }
+        return closestIndex
+    }
 }
 
 
 
 #Preview {
     HomeView()
+        .environmentObject(HomeViewModel())
 }
 
 
