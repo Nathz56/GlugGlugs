@@ -12,6 +12,28 @@ extension Notification.Name {
     static let waterDataUpdated = Notification.Name("waterDataUpdated")
 }
 
+enum TimePeriod {
+    case week
+    case month
+    case year
+    
+    var dateFormat: String {
+        switch self {
+        case .week: return "EEE"
+        case .month: return "dd"
+        case .year: return "MMM"
+        }
+    }
+    
+    var intervalComponent: DateComponents {
+        switch self {
+        case .week: return DateComponents(day: 1)
+        case .month: return DateComponents(day: 7)
+        case .year: return DateComponents(month: 1)
+        }
+    }
+}
+
 class HealthKitManager: ObservableObject {
     static let shared = HealthKitManager()
     private let volumeUnit = HKUnit.literUnit(with: .milli)
