@@ -57,10 +57,10 @@ struct ReminderView: View {
             }
             .navigationTitle("Reminder")
             .navigationBarItems(leading: EditButton(),
-                            trailing: Button("Add") {
-                                menuAddAlarm.toggle()
-                            }
-                        )
+                                trailing: Button("Add") {
+                menuAddAlarm.toggle()
+            }
+            )
             .sheet(isPresented: $menuAddAlarm) {
                 AddAlarmView { newAlarm in
                     let reminder = Reminder(time: newAlarm, isEnabled: true)
@@ -182,8 +182,8 @@ struct ReminderView: View {
         let remindersToDelete = offsets.map { listAlarms[$0] }
         listAlarms.remove(atOffsets: offsets)
         for reminder in remindersToDelete {
-                cancelNotification(for: reminder)
-            }
+            cancelNotification(for: reminder)
+        }
         sortAlarms()
     }
     
@@ -304,14 +304,24 @@ struct ReminderView: View {
 }
 
 private func scheduleNotification(for reminder: Reminder) {
+    
+    
     guard reminder.isEnabled else { return } //cek ke enable ga jamnya, kalo ga yaudah gausah di schedule
     
-    
+    let randomNotifBody = [
+        "Even you are busy, don't forget it's time to rehydrate so you can perform better!",
+        "Time for a water break! Stay hydrated, stay awesome!",
+        "Glug Glug alert! Your body says thanks for the H2O!",
+        "Hydration station calling! Time to sip some water!",
+        "Water time! Keep those fluids flowing!",
+        "Ding ding! Your hydration reminder is here!",
+        "Stay fresh, stay hydrated - it's water o'clock!"
+    ]
     
     
     let content = UNMutableNotificationContent()
-    content.title = "It's Glug Glug time !!!"
-    content.body = "Even you are busy, don't forget it's time to rehydrate so you can perform better!"
+    content.title = "It's Glug Glug time!"
+    content.body = randomNotifBody.randomElement() ?? "It's time to rehydrate!"
     content.sound = .default
     
     let calendar = Calendar.current
