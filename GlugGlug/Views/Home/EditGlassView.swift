@@ -17,6 +17,9 @@ struct EditGlassView: View {
     @State private var newAmount: String = ""
     @State private var newIcon: String = "mug.fill"
     
+    @State private var showSnackbar = false
+    @State private var snackbarMessage = ""
+    
     var body: some View {
         NavigationView {
             Form {
@@ -26,7 +29,14 @@ struct EditGlassView: View {
                     
                     Button("Add") {
                         if let amount = Int(newAmount) {
+                            if homeViewModel.glassOptions.contains(where: { $0.amount == amount }) {
+                                snackbarMessage = "Amount already exists!"
+                                showSnackbar = true
+                                return
+                            }
                             homeViewModel.addGlass(icon: newIcon, amount: amount)
+                            snackbarMessage = "Glass added!"
+                            showSnackbar = true
                             newAmount = ""
                             newIcon = "mug.fill"
                         }
@@ -60,6 +70,31 @@ struct EditGlassView: View {
                     }
                 }
             }
+            .overlay(
+                Group {
+                    if showSnackbar {
+                        VStack {
+                            Spacer()
+                            Text(snackbarMessage)
+                                .padding()
+                                .background(Color.black.opacity(0.8))
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                                .padding(.bottom, 40)
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                                .onAppear {
+                                    // Hide after 2 seconds
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                        withAnimation {
+                                            showSnackbar = false
+                                        }
+                                    }
+                                }
+                        }
+                    }
+                }
+            )
+            .animation(.easeInOut, value: showSnackbar)
         }
     }
 }
