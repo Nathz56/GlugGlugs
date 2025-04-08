@@ -59,7 +59,7 @@ struct RecommendationView: View {
     var body: some View {
         VStack {
             Spacer()
-            AlertBanner(message: "💦 Just enter your weight, and we’ll tell you how much water you need daily! 😊", iconName: "lightbulb.fill", backgroundColor: Color.blue.opacity(0.1), foregroundColor: Color.blue, textColor: Color.black)
+            AlertBanner(message: "💦 Just enter your weight, and we’ll tell you how much water you need daily! 😊", iconName: "lightbulb.fill", backgroundColor: Color.blue.opacity(0.1), foregroundColor: Color.blue, textColor: .primary)
             
             Spacer()
             
