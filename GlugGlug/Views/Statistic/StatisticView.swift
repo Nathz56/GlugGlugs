@@ -29,11 +29,26 @@ struct StatisticView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    StatisticInformationView(title: "Streak (Day)", value: "\(streak)", imageName: "drop.fill")
+                    
+                    StatCardView(
+                        iconName: "flame.fill",
+                        title: "Streak",
+                        value: "\(streak) \(streak == 1 ? "Day" : "Days")",
+                        backgroundColor: Color.blue.opacity(0.1)
+                    )
+                    
                     Spacer()
-                    StatisticInformationView(title: "Goal Achieved", value: "\(goalAchieved)", imageName: "target")
+                    
+                    StatCardView(
+                        iconName: "checkmark.seal.fill",
+                        title: "Goal Hits",
+                        value: "\(goalAchieved) \(goalAchieved == 1 ? "Time" : "Times")",
+                        backgroundColor: Color.blue.opacity(0.1)
+                    )
+                    
                     Spacer()
                 }
+
                 Spacer()
                 Spacer()
             }
@@ -43,7 +58,7 @@ struct StatisticView: View {
                         Text("Statistics")
                             .font(.title)
                             .bold()
-
+                        
                         switch selectedMode {
                         case .weekly:
                             Text("This Week")
@@ -58,13 +73,14 @@ struct StatisticView: View {
                                 .font(.title2)
                                 .foregroundStyle(.gray)
                         }
-                    
+                        
                     }
                     .padding(.top, 20)
                 }
             }
             .padding(.top, 20)
         }
+        .padding()
         .onAppear {
             HealthKitManager.shared.getStreak { streak in
                 self.streak = streak
@@ -100,7 +116,7 @@ struct StatisticInformationView: View {
         }
         .padding()
         .overlay(RoundedRectangle(cornerRadius: 4).stroke(lineWidth: 2).foregroundColor(.blue))
-
+        
         
     }
 }
