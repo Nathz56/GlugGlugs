@@ -17,17 +17,18 @@ struct EditGoalView: View {
         NavigationStack {
             VStack () {
                 Picker("Options", selection: $selectedSegment) {
-                    Text("Recommendation").tag(0)
-                    Text("Custom").tag(1)
+                    Text("Manual").tag(0)
+                    Text("By Weight").tag(1)
+                    
                 }
                 .pickerStyle(.segmented)
                 
                 Spacer()
                 
                 if selectedSegment == 0 {
-                    RecommendationView()
-                } else {
                     CustomView()
+                } else {
+                    RecommendationView()
                 }
                 Spacer()
             }
@@ -52,28 +53,33 @@ struct EditGoalView: View {
 }
 
 struct RecommendationView: View {
-    @State private var selectedWeight: Int = 50
     @EnvironmentObject var homeViewModel: HomeViewModel
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack {
             Spacer()
-            AlertBanner(message: "💦 Just enter your weight, and we’ll tell you how much water you need daily! 😊", iconName: "lightbulb.fill", backgroundColor: Color.blue.opacity(0.1), foregroundColor: Color.blue, textColor: .primary)
+            //            AlertBanner(message: "💦 Just enter your weight, and we’ll tell you how much water you need daily! 😊", iconName: "lightbulb.fill", backgroundColor: Color.blue.opacity(0.1), foregroundColor: Color.blue, textColor: .primary)
+            Text("\(Int(calculateDailyWaterRequirement(weightKg: Double(homeViewModel.weight))))")
+                .font(.largeTitle)
+            +
+            Text(" ml")
+                .font(.largeTitle)
+                .bold()
             
             Spacer()
             
             HStack {
                 Spacer()
                 
-                Picker(selection: $selectedWeight, label: Text("")) {
+                Picker(selection: $homeViewModel.weight, label: Text("")) {
                     ForEach(30...150, id: \.self) { weight in
                         Text("\(weight)") // Hanya angka di Wheel
                             .font(.title2)
                     }
                 }
                 .pickerStyle(WheelPickerStyle())
-                .frame(width: 100, height: 200)
+                .frame(width: 100, height: 180)
                 .clipped()
                 
                 Text("Kg")
@@ -86,10 +92,10 @@ struct RecommendationView: View {
             Spacer()
             
             Button {
-                homeViewModel.editGoal(Int(calculateDailyWaterRequirement(weightKg: Double(selectedWeight))))
+                homeViewModel.editGoal(Int(calculateDailyWaterRequirement(weightKg: Double(homeViewModel.weight))))
                 dismiss()
             } label: {
-                Text("Set your target: \(calculateDailyWaterRequirement(weightKg: Double(selectedWeight))) ml")
+                Text("Set your target")
             }
             .buttonStyle(CustomButtonStyle())
             .padding(.horizontal)
@@ -193,5 +199,6 @@ struct CustomView: View {
 
 #Preview {
     EditGoalView()
+        .environmentObject(HomeViewModel())
 }
 

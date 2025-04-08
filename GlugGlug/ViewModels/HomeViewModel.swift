@@ -13,13 +13,27 @@ class HomeViewModel: ObservableObject {
         didSet { UserDefaults.standard.set(goal, forKey: "goal") }
     }
     
-    @Published var glassOptions: [GlassOption] = []
+    @Published var glassOptions: [GlassOption] = [] {
+        didSet {
+            saveGlassOptions()
+        }
+    }
+    
+    @Published var weight: Int {
+        didSet { UserDefaults.standard.set(weight, forKey: "weight") }
+    }
     
     init() {
         let savedGoal = UserDefaults.standard.object(forKey: "goal") as? Int
+        let savedWeight = UserDefaults.standard.object(forKey: "weight") as? Int
 
         self.goal = savedGoal ?? 2500
+        self.weight = savedGoal ?? 70
         self.glassOptions = self.loadGlassOptions()
+    }
+    
+    func editWeight(_ newWeight: Int) {
+        weight = newWeight
     }
     
     func editGoal(_ newGoal: Int) {
@@ -29,11 +43,13 @@ class HomeViewModel: ObservableObject {
     func addGlass(icon: String, amount: Int) {
         let newGlass = GlassOption(icon: icon, amount: amount)
         glassOptions.append(newGlass)
+        saveGlassOptions()
     }
     
     func removeGlass(at index: Int) {
         guard glassOptions.indices.contains(index) else { return }
         glassOptions.remove(at: index)
+        saveGlassOptions()
     }
     
     private func saveGlassOptions() {
@@ -51,8 +67,6 @@ class HomeViewModel: ObservableObject {
             GlassOption(icon: "cup.and.saucer.fill", amount: 100),
             GlassOption(icon: "mug.fill", amount: 200),
             GlassOption(icon: "takeoutbag.and.cup.and.straw.fill", amount: 300),
-            GlassOption(icon: "wineglass.fill", amount: 400),
-            GlassOption(icon: "trophy.fill", amount: 500)
         ]
     }
 }
