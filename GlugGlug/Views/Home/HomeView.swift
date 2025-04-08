@@ -86,6 +86,8 @@ struct HomeView: View {
                 })
                 
                 Button {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    AudioManager.shared.playSound(named: "liquid-bubble.wav")
                     HealthKitManager.shared.addWaterAmount(volume: Double(homeViewModel.glassOptions[selectedIndex].amount))
                 } label: {
                     Image(systemName: "plus")
