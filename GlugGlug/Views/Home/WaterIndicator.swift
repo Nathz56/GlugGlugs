@@ -77,7 +77,7 @@ struct WaterIndicator: View {
                 }
             }
             
-        }.frame(height: UIScreen.main.bounds.height*0.28)
+        }.frame(height: UIScreen.main.bounds.height*0.35)
     }
 }
 

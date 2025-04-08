@@ -32,7 +32,7 @@ struct EditGoalView: View {
                 Spacer()
             }
             .padding(.horizontal)
-            .presentationDetents([.fraction(0.56)])
+            .presentationDetents([.fraction(0.58)])
             .toolbar {
                 ToolbarItem(placement: .principal) { // Title di tengah
                     Text("Edit Goal")
@@ -91,7 +91,8 @@ struct RecommendationView: View {
             } label: {
                 Text("Set your target: \(calculateDailyWaterRequirement(weightKg: Double(selectedWeight))) ml")
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(CustomButtonStyle())
+            .padding(.horizontal)
         }
     }
     
@@ -162,7 +163,8 @@ struct CustomView: View {
             } label: {
                 Text("Set your target")
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(CustomButtonStyle())
+            .padding(.horizontal)
         }
         
     }

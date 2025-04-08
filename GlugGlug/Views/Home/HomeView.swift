@@ -34,22 +34,31 @@ struct HomeView: View {
     
     @State private var progress: Int = 0
     
+    @State private var streak: Int = 0
+    
     var body: some View {
         NavigationStack {
             VStack () {
-                Text("⏰ No reminders set! Add one to stay on track! 💧")
-                    .font(.subheadline)
-                    .padding(.vertical, 8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+//                Text("⏰ No reminders set! Add one to stay on track! 💧")
+//                    .font(.subheadline)
+//                    .padding(.vertical, 8)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//                    .padding(.horizontal)
                 
-                    .padding(.horizontal)
+//                AlertBanner(message: "Welcome! 🚀 Set your reminder, target, and tumbler size to stay hydrated! 💧", iconName: "lightbulb.fill", backgroundColor: .yellow.opacity(0.2), foregroundColor: .yellow, textColor: .primary)
+//                    .padding(.bottom, 8)
+//                    .padding(.horizontal)
+                HStack () {
+                    StreakView(streakCount: streak)
+                }
+                .padding()
                 
-                AlertBanner(message: "Welcome! 🚀 Set your reminder, target, and tumbler size to stay hydrated! 💧", iconName: "lightbulb.fill", backgroundColor: .yellow.opacity(0.2), foregroundColor: .yellow, textColor: .primary)
-                    .padding(.bottom, 8)
-                    .padding(.horizontal)
+                
+                
+                Spacer()
                 
                 Text("\(progress) ml")
-                    .font(.title)
+                    .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
                     .padding(.bottom, 2)
@@ -76,9 +85,11 @@ struct HomeView: View {
                     }
                 }
                 .padding(.bottom)
+                Spacer()
                 
                 WaterIndicator(progress: $progressPercentage, startAnimation: $startAnimation)
                     .padding(.bottom, 8)
+                Spacer()
                 
                 GlassPicker(items: homeViewModel.glassOptions, selectedIndex: $selectedIndex,
                             onTap: {
@@ -90,14 +101,17 @@ struct HomeView: View {
                     AudioManager.shared.playSound(named: "liquid-bubble.wav")
                     HealthKitManager.shared.addWaterAmount(volume: Double(homeViewModel.glassOptions[selectedIndex].amount))
                 } label: {
-                    Image(systemName: "plus")
-                    Text("Add \(homeViewModel.glassOptions[selectedIndex].amount) ml")
+                    HStack {
+                        Image(systemName: "plus")
+                        Text("Add \(homeViewModel.glassOptions[selectedIndex].amount) ml")
+                            .font(.headline)
+                    }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(CustomButtonStyle())
+                .padding(.horizontal, 32)
                 Spacer()
                 
             }
-            .navigationTitle("GlugGlug!")
             
         }
         .onAppear {
@@ -113,6 +127,10 @@ struct HomeView: View {
             
             HealthKitManager.shared.startObservingWaterIntake { newProgress in
                 self.progress = newProgress
+            }
+            
+            HealthKitManager.shared.getStreak { streak in
+                self.streak = streak
             }
             
         }
@@ -131,8 +149,8 @@ struct HomeView: View {
             }
         }
         .tabItem {
-            Image(systemName: "house.fill")
-            Text("Home")
+            Image(systemName: "chart.line.uptrend.xyaxis")
+            Text("Tracker")
         }
         .sheet(item: $activeSheet) { item in
             sheetView(for: item)
