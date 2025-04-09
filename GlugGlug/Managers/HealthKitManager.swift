@@ -80,13 +80,15 @@ class HealthKitManager: ObservableObject {
             quantitySamplePredicate: predicate,
             options: .cumulativeSum
         ) { _, result, error in
-            guard let result = result, let sum = result.sumQuantity() else {
-                print("failed to read water volume: \(error?.localizedDescription ?? "UNKNOWN ERROR")")
+            if let error = error {
+                print("Error querying water volume: \(error.localizedDescription)")
                 completion(nil)
                 return
             }
             
-            let waterVolume = sum.doubleValue(for: self.volumeUnit)
+            let sum = result?.sumQuantity()
+            let waterVolume = sum?.doubleValue(for: self.volumeUnit) ?? 0.0
+            
             DispatchQueue.main.async {
                 completion(Int(waterVolume))
             }
@@ -289,7 +291,10 @@ class HealthKitManager: ObservableObject {
     }
     
     func getStreak(completion: @escaping (Int) -> Void) {
-        let goal = UserDefaults.standard.integer(forKey: "goal")
+        var goal = UserDefaults.standard.integer(forKey: "goal")
+        if goal == 0 {
+            goal = 2500
+        }
         let calendar = Calendar.current
         let now = Date()
         let anchorDate = calendar.startOfDay(for: now)
@@ -337,6 +342,8 @@ class HealthKitManager: ObservableObject {
                 }
                 
                 previousDate = date
+                
+                print("waterConsumption: \(waterConsumption) date: \(date)")
             }
 
             DispatchQueue.main.async {
