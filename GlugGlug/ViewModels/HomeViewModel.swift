@@ -28,7 +28,7 @@ class HomeViewModel: ObservableObject {
         let savedWeight = UserDefaults.standard.object(forKey: "weight") as? Int
 
         self.goal = savedGoal ?? 2500
-        self.weight = savedGoal ?? 70
+        self.weight = savedWeight ?? 70
         self.glassOptions = self.loadGlassOptions()
     }
     
