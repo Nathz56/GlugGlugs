@@ -350,7 +350,7 @@ class HealthKitManager: ObservableObject {
     }
     
     func getGoalAchieved(completion: @escaping (Int) -> Void) {
-        let goal = UserDefaults.standard.integer(forKey: "goal")
+        let goal = (UserDefaults.standard.object(forKey: "goal") as? Int) ?? 2500
         let calendar = Calendar.current
         let now = Date()
         let anchorDate = calendar.startOfDay(for: now)
