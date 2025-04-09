@@ -291,12 +291,8 @@ class HealthKitManager: ObservableObject {
     }
     
     func getStreak(completion: @escaping (Int) -> Void) {
-        var goal = UserDefaults.standard.integer(forKey: "goal")
-        if goal == 0 {
-            goal = 2500
-        }
-        
-        var calendar = Calendar.current
+        let goal = (UserDefaults.standard.object(forKey: "goal") as? Int) ?? 2500
+        let calendar = Calendar.current
         let now = Date()
         let anchorDate = calendar.startOfDay(for: now)
         
@@ -323,6 +319,7 @@ class HealthKitManager: ObservableObject {
             
             var streak = 0
             var encounteredToday = false
+            
             let statisticsArray = statsCollection.statistics().reversed()
             
             for statistics in statisticsArray {
