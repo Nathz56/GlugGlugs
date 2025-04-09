@@ -29,6 +29,13 @@ struct ChartView: View {
                         y: .value("Volume (mL)", vol)
                     )
                     .foregroundStyle(.blue)
+                    .annotation(position: .top) {
+                        if (vol > 0) {
+                            Text("\(Double(vol)/1000, specifier: "%.2f") L")
+                                .font(.footnote)
+                                .foregroundColor(.blue)
+                        }
+                    }
                 }
                 .frame(height: 300)
                 .padding()
