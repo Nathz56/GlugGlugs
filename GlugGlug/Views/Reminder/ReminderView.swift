@@ -22,6 +22,7 @@ struct ReminderView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var menuAddAlarm = false
     @State private var selectedReminder: Reminder?
+    @State private var duplicateWarning = false
     
     var body: some View {
         NavigationStack {
@@ -58,35 +59,55 @@ struct ReminderView: View {
             )
             .sheet(isPresented: $menuAddAlarm) {
                 AddAlarmView { newAlarm in
-                    let reminder = Reminder(time: newAlarm, isEnabled: true)
-                    reminderViewModel.listAlarms.append(reminder)
-                    reminderViewModel.sortAlarms()
-                    reminderViewModel.scheduleNotification(for: reminder)
+                    let calendar = Calendar.current
+                    let newTime = calendar.dateComponents ([.hour, .minute], from: newAlarm)
+                    
+                    let isDuplicate = reminderViewModel.listAlarms.contains {
+                        reminder in
+                        let existingTime = calendar.dateComponents([.hour, .minute], from: reminder.time)
+                        return existingTime.hour == newTime.hour && existingTime.minute == newTime.minute
+                    }
+                    
+                    if !isDuplicate {
+                        let reminder = Reminder(time: newAlarm, isEnabled: true)
+                        reminderViewModel.listAlarms.append(reminder)
+                        reminderViewModel.sortAlarms()
+                        reminderViewModel.scheduleNotification(for: reminder)
+                    } else {
+                        duplicateWarning = true
+                    }
                 }
                 .presentationDetents([.height(350)])
             }
-            .sheet(item: $selectedReminder) { reminder in
-                EditAlarmView(reminder: Binding(
-                    get: { reminder }, //ambil jamnya
-                    set: { updatedReminder in
-                        if let index = reminderViewModel.listAlarms.firstIndex(where: { $0.id == updatedReminder.id }) { //nyari alarm di array dari id 0 satu satu di iterate
-                            reminderViewModel.listAlarms[index] = updatedReminder //array ketemu baru direplace sama reminder baru
-                            reminderViewModel.sortAlarms()
-                            reminderViewModel.cancelNotification(for: reminder) //cancel notif alarm sblmnya
-                            if updatedReminder.isEnabled {
-                                reminderViewModel.scheduleNotification(for: updatedReminder) //schedulebuat alarm baru
+                
+                .sheet(item: $selectedReminder) { reminder in
+                    EditAlarmView(reminder: Binding(
+                        get: { reminder }, //ambil jamnya
+                        set: { updatedReminder in
+                            if let index = reminderViewModel.listAlarms.firstIndex(where: { $0.id == updatedReminder.id }) { //nyari alarm di array dari id 0 satu satu di iterate
+                                reminderViewModel.listAlarms[index] = updatedReminder //array ketemu baru direplace sama reminder baru
+                                reminderViewModel.sortAlarms()
+                                reminderViewModel.cancelNotification(for: reminder) //cancel notif alarm sblmnya
+                                if updatedReminder.isEnabled {
+                                    reminderViewModel.scheduleNotification(for: updatedReminder) //schedulebuat alarm baru
+                                }
                             }
+                            selectedReminder = updatedReminder
                         }
-                        selectedReminder = updatedReminder
-                    }
-                ), saveTime: { _ in }) //closure kosong buat editalarmview, kalo logicnya ttp di struct atas
-                .presentationDetents([.height(330)])
-            }
-            .onAppear {
-                reminderViewModel.requestNotification()
-                reminderViewModel.loadAlarms()
-            }
+                    ), saveTime: { _ in }) //closure kosong buat editalarmview, kalo logicnya ttp di struct atas
+                    .presentationDetents([.height(330)])
+                }
+                .onAppear {
+                    reminderViewModel.requestNotification()
+                    reminderViewModel.loadAlarms()
+                }
+                .alert ("Duplicate Time", isPresented: $duplicateWarning) {
+                    Button ("Dismiss", role: .cancel) {}
+                } message : {
+                    Text ("The time you are trying to add is already exists.")
+                }
         }
+        
         .tabItem {
             Image(systemName: "alarm.fill")
             Text("Reminder")
@@ -116,7 +137,7 @@ struct ReminderView: View {
                 .contentShape(Rectangle())
                 .opacity(reminderViewModel.listAlarms[index].isEnabled ? 1.0 : 0.6)
                 .onTapGesture {
-                  selectedReminder = reminderViewModel.listAlarms[index]
+                    selectedReminder = reminderViewModel.listAlarms[index]
                 }
             }
             .onDelete(perform: reminderViewModel.deleteAlarm)
