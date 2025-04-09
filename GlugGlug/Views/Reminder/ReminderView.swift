@@ -95,7 +95,7 @@ struct ReminderView: View {
                             selectedReminder = updatedReminder
                         }
                     ), saveTime: { _ in }) //closure kosong buat editalarmview, kalo logicnya ttp di struct atas
-                    .presentationDetents([.height(330)])
+                    .presentationDetents([.height(350)])
                 }
                 .onAppear {
                     reminderViewModel.requestNotification()
