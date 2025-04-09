@@ -295,7 +295,8 @@ class HealthKitManager: ObservableObject {
         if goal == 0 {
             goal = 2500
         }
-        let calendar = Calendar.current
+        
+        var calendar = Calendar.current
         let now = Date()
         let anchorDate = calendar.startOfDay(for: now)
         
@@ -321,31 +322,28 @@ class HealthKitManager: ObservableObject {
             }
             
             var streak = 0
-            var previousDate: Date?
-
+            var encounteredToday = false
+            let statisticsArray = statsCollection.statistics().reversed()
             
-            for statistics in statsCollection.statistics() {
-                let date = calendar.startOfDay(for: statistics.startDate)
+            for statistics in statisticsArray {
+                let localDate = calendar.startOfDay(for: statistics.startDate.addingTimeInterval(TimeInterval(TimeZone.current.secondsFromGMT())))
                 let waterConsumption = statistics.sumQuantity()?.doubleValue(for: self.volumeUnit) ?? 0.0
-                                
-                if let previous = previousDate {
-                    if let expectedDate = calendar.date(byAdding: .day, value: -1, to: previous),
-                       date != expectedDate {
-                        break
+                
+                if calendar.isDate(localDate, inSameDayAs: anchorDate) {
+                    encounteredToday = true
+                    if waterConsumption >= Double(goal) {
+                        streak += 1
                     }
+                    continue
                 }
                 
                 if waterConsumption >= Double(goal) {
                     streak += 1
-                } else {
+                } else if encounteredToday {
                     break
                 }
-                
-                previousDate = date
-                
-                print("waterConsumption: \(waterConsumption) date: \(date)")
             }
-
+            
             DispatchQueue.main.async {
                 completion(streak)
             }
