@@ -149,6 +149,7 @@ struct CustomView: View {
                 ForEach(numbers, id: \.self) { row in
                     ForEach(row, id: \.self) { item in
                         Button(action: {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             handleInput(item)
                         }) {
                             Text(item)

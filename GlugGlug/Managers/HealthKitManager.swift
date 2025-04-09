@@ -70,16 +70,15 @@ class HealthKitManager: ObservableObject {
         }
     }
     
-    func addWaterAmount(volume : Double) {
+    func addWaterAmount(volume : Double, date: Date = Date()) {
         guard let quantityType = self.waterType else {
             print("Error: dietaryWater quantity type is nil")
             return
         }
         
         let drinkAmount = HKQuantity(unit: volumeUnit, doubleValue: volume)
-        let now = Date()
         
-        let data = HKQuantitySample(type: quantityType, quantity: drinkAmount, start: now, end: now)
+        let data = HKQuantitySample(type: quantityType, quantity: drinkAmount, start: date, end: date)
         self.healthStore.save(data) { success, error in
             if let error = error {
                 print("Error saving water data: \(error.localizedDescription)")

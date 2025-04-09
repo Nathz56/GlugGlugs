@@ -14,19 +14,41 @@ struct StatisticView: View {
     @State private var streak: Int = 0
     @State private var goalAchieved: Int = 0
     
+    @State private var showAddManualView: Bool = false
+    
     var body: some View {
         NavigationStack{
             VStack {
+                HStack {
+                    switch selectedMode {
+                    case .weekly:
+                        Text("This Week")
+                            .font(.title3)
+                            .foregroundStyle(.gray)
+                    case .monthly:
+                        Text("This Month")
+                            .font(.title3)
+                            .foregroundStyle(.gray)
+                    case .yearly:
+                        Text("This Year")
+                            .font(.title3)
+                            .foregroundStyle(.gray)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal)
+                
                 Picker("", selection: $selectedMode) {
                     Text("Week").tag(StatisticMode.weekly)
                     Text("Month").tag(StatisticMode.monthly)
                     Text("Year").tag(StatisticMode.yearly)
                 }
                 .pickerStyle(.segmented)
-                .padding(20)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
                 
                 ChartView(selectedMode: $selectedMode)
-                Spacer()
+                
                 HStack {
                     Spacer()
                     
@@ -48,39 +70,48 @@ struct StatisticView: View {
                     
                     Spacer()
                 }
-
-                Spacer()
+                .padding(.horizontal, 8)
+                
                 Spacer()
             }
-            .toolbar {
-                ToolbarItem(placement: .navigation) {
-                    VStack(alignment: .leading) {
-                        Text("Statistics")
-                            .font(.title)
-                            .bold()
-                        
-                        switch selectedMode {
-                        case .weekly:
-                            Text("This Week")
-                                .font(.title2)
-                                .foregroundStyle(.gray)
-                        case .monthly:
-                            Text("This Month")
-                                .font(.title2)
-                                .foregroundStyle(.gray)
-                        case .yearly:
-                            Text("This Year")
-                                .font(.title2)
-                                .foregroundStyle(.gray)
-                        }
-                        
-                    }
-                    .padding(.top, 20)
+            .navigationTitle("Statistics")
+            .navigationBarItems(
+                trailing: Button("Add") {
+                    showAddManualView.toggle()
                 }
+            )
+            .sheet(isPresented: $showAddManualView) {
+                AddManualView()
             }
-            .padding(.top, 20)
+            //            .toolbar {
+            //                ToolbarItem(placement: .navigation) {
+            //                    VStack(alignment: .leading) {
+            //                        Text("Statistics")
+            //                            .font(.title)
+            //                            .bold()
+            //
+            //                        switch selectedMode {
+            //                        case .weekly:
+            //                            Text("This Week")
+            //                                .font(.title2)
+            //                                .foregroundStyle(.gray)
+            //                        case .monthly:
+            //                            Text("This Month")
+            //                                .font(.title2)
+            //                                .foregroundStyle(.gray)
+            //                        case .yearly:
+            //                            Text("This Year")
+            //                                .font(.title2)
+            //                                .foregroundStyle(.gray)
+            //                        }
+            //
+            //                    }
+            //                    .padding(.top, 20)
+            //                }
+            //            }
+//            .padding(.top, 20)
         }
-        .padding()
+//        .padding()
         .onAppear {
             HealthKitManager.shared.getStreak { streak in
                 self.streak = streak
