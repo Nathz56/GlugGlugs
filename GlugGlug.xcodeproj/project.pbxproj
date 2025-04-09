@@ -10,9 +10,22 @@
 		5750BCE82D8A53A800EA176B /* GlugGlug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GlugGlug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8F985F7E2DA623FB00BD325F /* Exceptions for "GlugGlug" folder in "GlugGlug" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5750BCE72D8A53A800EA176B /* GlugGlug */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5750BCEA2D8A53A800EA176B /* GlugGlug */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8F985F7E2DA623FB00BD325F /* Exceptions for "GlugGlug" folder in "GlugGlug" target */,
+			);
 			path = GlugGlug;
 			sourceTree = "<group>";
 		};
@@ -256,11 +269,12 @@
 				DEVELOPMENT_TEAM = 35K6F49UH8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GlugGlug/Info.plist;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We use health data for share water consumption";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We use health data for save water consumption";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -288,11 +302,12 @@
 				DEVELOPMENT_TEAM = 35K6F49UH8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GlugGlug/Info.plist;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We use health data for share water consumption";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We use health data for save water consumption";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
