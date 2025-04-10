@@ -379,15 +379,9 @@ class HealthKitManager: ObservableObject {
             var goalAchieved = 0
             
             for statistics in statsCollection.statistics() {
-                if let sum = statistics.sumQuantity() {
-                    let liter = sum.doubleValue(for: self.volumeUnit)
-                    if liter >= Double(goal) {
-                        goalAchieved += 1
-                    } else {
-                        break
-                    }
-                } else {
-                    break
+                let waterConsumption = statistics.sumQuantity()?.doubleValue(for: self.volumeUnit) ?? 0.0
+                if waterConsumption >= Double(goal) {
+                    goalAchieved += 1
                 }
             }
 
