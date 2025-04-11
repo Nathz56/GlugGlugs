@@ -60,3 +60,20 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# User-specific Xcode settings
+*.xcuserdatad
+xcuserdata/
+
+# Xcode
+.DS_Store
+*.swp
+xcuserdata/
+DerivedData/
+
+# Build artifacts
+/build/
+*.xcodeproj/xcuserdata/
+
+#bundlename
+*.pbxproj
