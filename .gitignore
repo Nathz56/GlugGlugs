@@ -76,4 +76,4 @@ DerivedData/
 *.xcodeproj/xcuserdata/
 
 #bundlename
-*.pbxproj
+*.xcodeproj/project.pbxproj
